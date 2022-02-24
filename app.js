@@ -1,4 +1,6 @@
-/* This backend JSON API retrieves a JSON data object containing a sorted, duplicate-free array of blog posts, 
+/* Hatchways API Assessment by Brandon Chavez, completed on 02/24/22.
+
+   This backend JSON API retrieves a JSON data object containing a sorted, duplicate-free array of blog posts, 
    from the hatchways.io API, that conform to user-defined search criteria and formatting including relevant 
    tags, sort order, and the property by which blog posts are sorted.
 
