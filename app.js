@@ -1,7 +1,11 @@
-/* Defines the client-side cache system and routes for our REST API server. 
-   This logic is exported for actual server instantiation in server.js.
+/* This backend JSON API retrieves a JSON data object containing a sorted, duplicate-free array of blog posts, 
+   from the hatchways.io API, that conform to user-defined search criteria and formatting including relevant 
+   tags, sort order, and the property by which blog posts are sorted.
+
+   This file defines the server-side cache system and routes for the server. 
+   It's logic is exported for actual server instantiation in server.js.
    The server instantiation logic was decoupled from the app's main logic to 
-   allow for jest/supertest to run multiple server instances for efficient testing. */
+   allow for jest/supertest to run multiple server instances in parallel for efficient testing. */
 const fetch = require("node-fetch");
 const express = require("express");
 const app = express();
