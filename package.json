@@ -1,0 +1,23 @@
+{
+  "name": "hatchways-api-assessment",
+  "version": "1.0.0",
+  "description": "My solution for the Hatchways back-end API assessment.",
+  "main": "server.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "author": "Brandon Chavez",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.3",
+    "node-fetch": "2.0",
+    "nodemon": "^2.0.15"
+  },
+  "devDependencies": {
+    "jest": "^27.5.1",
+    "supertest": "^6.2.2"
+  }
+}
