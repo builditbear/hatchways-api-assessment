@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.3",
+    "memory-cache": "^0.2.0",
     "node-fetch": "2.0",
     "nodemon": "^2.0.15"
   },

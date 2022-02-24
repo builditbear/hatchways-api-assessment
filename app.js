@@ -1,22 +1,46 @@
+/* Defines the client-side cache system and routes for our REST API server. 
+   This logic is exported for actual server instantiation in server.js.
+   The server instantiation logic was decoupled from the app's main logic to 
+   allow for jest/supertest to run multiple server instances for efficient testing. */
 const fetch = require("node-fetch");
 const express = require("express");
 const app = express();
+const cache = require("memory-cache");
 
-app.get("/", (req, res) => {
+// Attempts to retrieve a given GET request by URL from cache.
+// Otherwise, it stores the next response made for a given number of seconds in cache.
+const cacheCheck = (storageDurationInSeconds) => {
+  return (req, res, next) => {
+    const key = req.originalUrl;
+    const cachedBody = cache.get(key);
+    if (cachedBody) {
+      return res.send(cachedBody);
+    } else {
+      /* If the requested URL isn't in our cache, redefine res.send to cache the response 
+       before sending it out. Then pass it to the API as normal. */
+      res.originalSend = res.send;
+      res.send = (responseBody) => {
+        cache.put(key, responseBody, storageDurationInSeconds * 1000);
+        res.originalSend(responseBody);
+      };
+      next();
+    }
+  };
+};
+
+app.get("/", cacheCheck(1), (req, res) => {
   res.send("Welcome to our homepage!");
 });
 
-// Route 1
-app.get("/api/ping", (req, res) => {
+app.get("/api/ping", cacheCheck(1), (req, res) => {
   res.status(200).json({
     success: true,
     message: `Your ping succeeded. Status code ${res.statusCode} was sent!`,
   });
 });
 
-//Route 2
 app.use("/api/posts", (req, res, next) => {
-  // Set defaults if no value is passed in for eithero optional query params.
+  // Set defaults if no value is passed in for either optional query params.
   if (!req.query.sortBy) {
     req.query.sortBy = "id";
   }
@@ -25,8 +49,8 @@ app.use("/api/posts", (req, res, next) => {
   }
   next();
 });
-//=====================================================================
-app.get("/api/posts", async function (req, res) {
+
+app.get("/api/posts", cacheCheck(1), async function (req, res) {
   // Retrieve and validate query parameters.
   if (!req.query.tags) {
     return res.status(400).json({ error: "Tags parameter is required." });
@@ -40,7 +64,7 @@ app.get("/api/posts", async function (req, res) {
   if (!["asc", "desc"].includes(direction)) {
     return res.status(400).json({ error: "direction parameter is invalid." });
   }
-  //=====================================================================
+
   // Retrieve and filter data from hatchways API.
   let blogPosts = [];
   for (const tag of tags) {
@@ -60,7 +84,7 @@ app.get("/api/posts", async function (req, res) {
       ),
     ];
   }
-  //=====================================================================
+
   // Sort blogPosts by the desired key and in the specified direction before sending it as the response.
   if (direction === "asc") {
     blogPosts = blogPosts.sort(
@@ -71,8 +95,8 @@ app.get("/api/posts", async function (req, res) {
       (blogPostA, blogPostB) => blogPostB[sortBy] - blogPostA[sortBy]
     );
   }
-  // Send response
-  res.send(blogPosts);
+  // Send object wrapped array back to client.
+  res.send({ posts: blogPosts });
 });
 
 module.exports = app;
